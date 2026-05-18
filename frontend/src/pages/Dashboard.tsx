@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useAuthStore } from '../store/authStore';
 import useDebounce from '../hooks/useDebounce';
-import { Download, Search, Trash2, LogOut, ChevronLeft, ChevronRight, User as UserIcon } from 'lucide-react';
+import { Download, Search, Trash2, Edit2, LogOut, ChevronLeft, ChevronRight, User as UserIcon, Plus } from 'lucide-react';
+import LeadFormModal from '../components/LeadFormModal';
 
 interface Lead {
   _id: string;
@@ -18,6 +19,10 @@ export default function Dashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
 
   // Filtering & Pagination state
   const [search, setSearch] = useState('');
@@ -58,7 +63,6 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, debouncedSearch, status, source, sort]);
 
-  // Reset page to 1 when filters change
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, status, source, sort]);
@@ -67,10 +71,20 @@ export default function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this lead?')) return;
     try {
       await api.delete(`/leads/${id}`);
-      fetchLeads(); // Refresh list
+      fetchLeads();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to delete lead');
     }
+  };
+
+  const openAddModal = () => {
+    setEditingLead(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (lead: Lead) => {
+    setEditingLead(lead);
+    setIsModalOpen(true);
   };
 
   const handleExportCSV = async () => {
@@ -100,7 +114,6 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
       <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -131,13 +144,22 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold text-gray-900">Leads Management</h2>
             <p className="text-sm text-gray-500 mt-1">Manage and track your lead pipeline.</p>
           </div>
-          <button
-            onClick={handleExportCSV}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer"
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={handleExportCSV}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </button>
+            <button
+              onClick={openAddModal}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Lead
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -146,7 +168,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Filters */}
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -194,7 +215,6 @@ export default function Dashboard() {
           </select>
         </div>
 
-        {/* Table */}
         <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -204,9 +224,7 @@ export default function Dashboard() {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Added</th>
-                  {user?.role === 'Admin' && (
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  )}
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -217,7 +235,7 @@ export default function Dashboard() {
                 ) : leads.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-500">
-                      No leads found matching your criteria.
+                      No leads found matching your criteria. Click "Add Lead" to create one.
                     </td>
                   </tr>
                 ) : (
@@ -238,17 +256,24 @@ export default function Dashboard() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(lead.createdAt).toLocaleDateString()}
                       </td>
-                      {user?.role === 'Admin' && (
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                        <button
+                          onClick={() => openEditModal(lead)}
+                          className="text-blue-600 hover:text-blue-900 cursor-pointer"
+                          title="Edit Lead"
+                        >
+                          <Edit2 className="h-5 w-5 inline" />
+                        </button>
+                        {user?.role === 'Admin' && (
                           <button
                             onClick={() => handleDelete(lead._id)}
                             className="text-red-600 hover:text-red-900 cursor-pointer"
                             title="Delete Lead"
                           >
-                            <Trash2 className="h-5 w-5" />
+                            <Trash2 className="h-5 w-5 inline" />
                           </button>
-                        </td>
-                      )}
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -256,7 +281,6 @@ export default function Dashboard() {
             </table>
           </div>
           
-          {/* Pagination */}
           <div className="bg-white px-4 py-3 border-t border-gray-200 flex items-center justify-between sm:px-6">
             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
@@ -291,6 +315,13 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      <LeadFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fetchLeads}
+        initialData={editingLead}
+      />
     </div>
   );
 }
