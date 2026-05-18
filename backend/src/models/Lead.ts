@@ -23,6 +23,10 @@ const LeadSchema: Schema = new Schema(
       enum: ['Website', 'Instagram', 'Referral'],
       required: true,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   { timestamps: true }
 );

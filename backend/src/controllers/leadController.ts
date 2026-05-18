@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import Lead from '../models/Lead';
+import { AuthRequest } from '../middleware/auth';
 
 // Create a Lead
-export const createLead = async (req: Request, res: Response): Promise<void> => {
+export const createLead = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { name, email, status, source } = req.body;
     
@@ -11,7 +12,7 @@ export const createLead = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const lead = await Lead.create({ name, email, status, source });
+    const lead = await Lead.create({ name, email, status, source, owner: req.user?.id });
     res.status(201).json({ success: true, data: lead });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message || 'Server Error' });
@@ -19,7 +20,7 @@ export const createLead = async (req: Request, res: Response): Promise<void> => 
 };
 
 // Get all leads with Search, Filter, Sort, and Pagination
-export const getLeads = async (req: Request, res: Response): Promise<void> => {
+export const getLeads = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { page = '1', search, status, source, sort = 'latest' } = req.query;
 
@@ -27,8 +28,8 @@ export const getLeads = async (req: Request, res: Response): Promise<void> => {
     const limit = 10;
     const skip = (pageNum - 1) * limit;
 
-    // Build Query
-    const query: any = {};
+    // Build Query: Only fetch leads belonging to the logged-in user
+    const query: any = { owner: req.user?.id };
 
     if (search) {
       query.$or = [
@@ -67,9 +68,9 @@ export const getLeads = async (req: Request, res: Response): Promise<void> => {
 };
 
 // Get single lead
-export const getLeadById = async (req: Request, res: Response): Promise<void> => {
+export const getLeadById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const lead = await Lead.findById(req.params.id);
+    const lead = await Lead.findOne({ _id: req.params.id, owner: req.user?.id });
     if (!lead) {
       res.status(404).json({ success: false, message: 'Lead not found' });
       return;
@@ -81,15 +82,16 @@ export const getLeadById = async (req: Request, res: Response): Promise<void> =>
 };
 
 // Update lead
-export const updateLead = async (req: Request, res: Response): Promise<void> => {
+export const updateLead = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const lead = await Lead.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user?.id },
+      req.body,
+      { new: true, runValidators: true }
+    );
 
     if (!lead) {
-      res.status(404).json({ success: false, message: 'Lead not found' });
+      res.status(404).json({ success: false, message: 'Lead not found or unauthorized' });
       return;
     }
 
@@ -100,12 +102,12 @@ export const updateLead = async (req: Request, res: Response): Promise<void> => 
 };
 
 // Delete lead
-export const deleteLead = async (req: Request, res: Response): Promise<void> => {
+export const deleteLead = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const lead = await Lead.findByIdAndDelete(req.params.id);
+    const lead = await Lead.findOneAndDelete({ _id: req.params.id, owner: req.user?.id });
     
     if (!lead) {
-      res.status(404).json({ success: false, message: 'Lead not found' });
+      res.status(404).json({ success: false, message: 'Lead not found or unauthorized' });
       return;
     }
 
@@ -116,9 +118,9 @@ export const deleteLead = async (req: Request, res: Response): Promise<void> => 
 };
 
 // Export leads to CSV
-export const exportLeadsCSV = async (req: Request, res: Response): Promise<void> => {
+export const exportLeadsCSV = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const leads = await Lead.find({}).sort({ createdAt: -1 });
+    const leads = await Lead.find({ owner: req.user?.id }).sort({ createdAt: -1 });
 
     const csvHeader = 'Name,Email,Status,Source,CreatedAt\n';
     const csvRows = leads.map(lead => {
