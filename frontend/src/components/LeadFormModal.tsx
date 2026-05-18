@@ -46,59 +46,56 @@ export default function LeadFormModal({ isOpen, onClose, onSuccess, initialData 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onClick={onClose}></div>
       
-      {/* Modal */}
-      <div className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-8 transform transition-all overflow-hidden">
+      {/* Modal Container */}
+      <div className="relative bg-black rounded-xl border border-gray-800 w-full max-w-lg p-8 transform transition-all overflow-hidden">
         
-        {/* Decorative Top Gradient */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-            {initialData ? 'Update Lead details' : 'Add a New Lead'}
+        <div className="flex justify-between items-center mb-8 relative z-10">
+          <h3 className="text-2xl font-bold text-white tracking-tight">
+            {initialData ? 'Update Lead' : 'New Lead'}
           </h3>
-          <button onClick={onClose} className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition-colors cursor-pointer">
-            <X className="h-5 w-5" />
+          <button onClick={onClose} className="p-2 text-gray-500 hover:text-white transition-colors cursor-pointer">
+            <X className="h-6 w-6" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-6 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-3 rounded-xl border border-rose-200 dark:border-rose-500/20">
+          <div className="mb-6 text-sm font-medium text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20 relative z-10">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">First & Last Name</label>
             <input
               type="text"
               required
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+              className="w-full px-4 py-3.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none placeholder-gray-500"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="John Doe"
+              placeholder="Enter full name"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
             <input
               type="email"
               required
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
+              className="w-full px-4 py-3.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none placeholder-gray-500"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="john@example.com"
+              placeholder="Enter email address"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Status</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
               <select
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none cursor-pointer"
+                className="w-full px-4 py-3.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none cursor-pointer appearance-none"
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
               >
@@ -110,9 +107,9 @@ export default function LeadFormModal({ isOpen, onClose, onSuccess, initialData 
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Source</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Source</label>
               <select
-                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none cursor-pointer"
+                className="w-full px-4 py-3.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none cursor-pointer appearance-none"
                 value={formData.source}
                 onChange={(e) => setFormData({ ...formData, source: e.target.value })}
               >
@@ -123,18 +120,18 @@ export default function LeadFormModal({ isOpen, onClose, onSuccess, initialData 
             </div>
           </div>
 
-          <div className="pt-6 flex justify-end space-x-3">
+          <div className="pt-4 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-semibold rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              className="px-6 py-3.5 text-sm font-medium rounded-lg text-gray-300 bg-transparent border border-gray-800 hover:bg-gray-900 hover:text-white transition-colors cursor-pointer w-full sm:w-auto text-center"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+              className="px-6 py-3.5 text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-blue-600 disabled:opacity-50 transition-all cursor-pointer w-full sm:w-auto text-center"
             >
               {loading ? 'Saving...' : 'Save Lead'}
             </button>

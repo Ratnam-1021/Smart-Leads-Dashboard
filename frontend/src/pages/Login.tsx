@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../api/axios';
+import { ArrowRight } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,9 +15,7 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
-    
     try {
       const response = await api.post('/auth/login', { email, password });
       if (response.data.success) {
@@ -32,50 +31,55 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 transition-colors">
+    <div className="min-h-screen relative flex items-center justify-center bg-[#030712] overflow-hidden px-4">
       
-      {/* Decorative Blur Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+      {/* ServiceHive Themed Background */}
+      <div className="absolute inset-0 starry-bg pointer-events-none"></div>
+      
+      {/* Central Blue Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="max-w-md w-full relative">
+      <div className="max-w-md w-full relative z-10">
         <div className="text-center mb-10">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/30 mb-6">
-            <span className="text-white font-bold text-3xl">G</span>
+          <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6 shadow-xl">
+            <span className="text-blue-400 text-sm font-semibold tracking-wide uppercase">GigFlow Leads</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Welcome back</h2>
-          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-            Log in to manage your GigFlow pipeline
+          <h2 className="text-4xl font-extrabold text-white tracking-tight mb-4">
+            Smart Solutions for <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-200 italic">Growing Businesses</span>
+          </h2>
+          <p className="text-gray-400 text-sm max-w-sm mx-auto">
+            Manage your sales pipeline, track leads, and close deals faster with our intelligent dashboard.
           </p>
         </div>
         
-        <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl p-8 shadow-2xl shadow-slate-200/50 dark:shadow-none border border-white/20 dark:border-slate-800 rounded-3xl">
+        <div className="bg-black p-8 sm:p-10 rounded-xl border border-gray-800 shadow-2xl relative z-10">
           {error && (
-            <div className="mb-6 text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 p-4 rounded-xl border border-rose-100 dark:border-rose-500/20">
+            <div className="mb-6 text-sm font-medium text-red-400 bg-red-500/10 p-4 rounded-lg border border-red-500/20">
               {error}
             </div>
           )}
           
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Email Address</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
               <input
                 type="email"
                 required
-                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
-                placeholder="you@company.com"
+                className="w-full px-4 py-3.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none placeholder-gray-500"
+                placeholder="Enter your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
               <input
                 type="password"
                 required
-                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none"
-                placeholder="••••••••"
+                className="w-full px-4 py-3.5 bg-[#0a0a0a] border border-gray-800 rounded-lg text-white focus:ring-1 focus:ring-blue-600 focus:border-blue-600 transition-all outline-none placeholder-gray-500"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -84,16 +88,16 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-indigo-500/30 text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all cursor-pointer transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center py-3.5 px-4 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-blue-600 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
 
-          <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-8 text-center text-sm text-gray-500">
             Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors">
-              Create an account
+            <Link to="/register" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
+              Request access
             </Link>
           </p>
         </div>
