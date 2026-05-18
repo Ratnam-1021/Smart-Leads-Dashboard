@@ -5,6 +5,7 @@ export interface ILead extends Document {
   email: string;
   status: 'New' | 'Contacted' | 'Qualified' | 'Lost';
   source: 'Website' | 'Instagram' | 'Referral';
+  owner?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
