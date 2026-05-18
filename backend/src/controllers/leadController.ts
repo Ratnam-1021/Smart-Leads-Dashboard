@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import Lead from '../models/Lead';
 import { AuthRequest } from '../middleware/auth';
 
@@ -28,8 +28,11 @@ export const getLeads = async (req: AuthRequest, res: Response): Promise<void> =
     const limit = 10;
     const skip = (pageNum - 1) * limit;
 
-    // Build Query: Only fetch leads belonging to the logged-in user
-    const query: any = { owner: req.user?.id };
+    // RBAC: Admins see all, Sales Users see only theirs
+    const query: any = {};
+    if (req.user?.role !== 'Admin') {
+      query.owner = req.user?.id;
+    }
 
     if (search) {
       query.$or = [
@@ -50,7 +53,7 @@ export const getLeads = async (req: AuthRequest, res: Response): Promise<void> =
     const sortOptions: any = sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 };
 
     // Execute Query with Pagination
-    const leads = await Lead.find(query).sort(sortOptions).skip(skip).limit(limit);
+    const leads = await Lead.find(query).sort(sortOptions).skip(skip).limit(limit).populate('owner', 'name email');
     const totalCount = await Lead.countDocuments(query);
 
     res.json({
@@ -70,9 +73,10 @@ export const getLeads = async (req: AuthRequest, res: Response): Promise<void> =
 // Get single lead
 export const getLeadById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const lead = await Lead.findOne({ _id: req.params.id, owner: req.user?.id });
+    const query = req.user?.role === 'Admin' ? { _id: req.params.id } : { _id: req.params.id, owner: req.user?.id };
+    const lead = await Lead.findOne(query);
     if (!lead) {
-      res.status(404).json({ success: false, message: 'Lead not found' });
+      res.status(404).json({ success: false, message: 'Lead not found or unauthorized' });
       return;
     }
     res.json({ success: true, data: lead });
@@ -84,8 +88,9 @@ export const getLeadById = async (req: AuthRequest, res: Response): Promise<void
 // Update lead
 export const updateLead = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    const query = req.user?.role === 'Admin' ? { _id: req.params.id } : { _id: req.params.id, owner: req.user?.id };
     const lead = await Lead.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user?.id },
+      query,
       req.body,
       { new: true, runValidators: true }
     );
@@ -104,7 +109,8 @@ export const updateLead = async (req: AuthRequest, res: Response): Promise<void>
 // Delete lead
 export const deleteLead = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const lead = await Lead.findOneAndDelete({ _id: req.params.id, owner: req.user?.id });
+    const query = req.user?.role === 'Admin' ? { _id: req.params.id } : { _id: req.params.id, owner: req.user?.id };
+    const lead = await Lead.findOneAndDelete(query);
     
     if (!lead) {
       res.status(404).json({ success: false, message: 'Lead not found or unauthorized' });
@@ -120,7 +126,8 @@ export const deleteLead = async (req: AuthRequest, res: Response): Promise<void>
 // Export leads to CSV
 export const exportLeadsCSV = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const leads = await Lead.find({ owner: req.user?.id }).sort({ createdAt: -1 });
+    const query = req.user?.role === 'Admin' ? {} : { owner: req.user?.id };
+    const leads = await Lead.find(query).sort({ createdAt: -1 });
 
     const csvHeader = 'Name,Email,Status,Source,CreatedAt\n';
     const csvRows = leads.map(lead => {
