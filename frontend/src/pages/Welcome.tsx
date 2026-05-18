@@ -21,8 +21,6 @@ export default function Welcome() {
         </div>
         <div className="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-300">
           <span className="hover:text-white cursor-pointer transition-colors">Home</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Features</span>
-          <span className="hover:text-white cursor-pointer transition-colors">AI Products</span>
           <Link to="/login" className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors cursor-pointer glow-blue">
             Log In
           </Link>
