@@ -43,7 +43,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
           name: user.name,
           email: user.email,
           role: user.role,
-          token: generateToken(user._id as string, user.role),
+          token: generateToken(user._id.toString(), user.role),
         },
       });
     } else {
@@ -84,7 +84,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         name: user.name,
         email: user.email,
         role: user.role,
-        token: generateToken(user._id as string, user.role),
+        token: generateToken(user._id.toString(), user.role),
       },
     });
   } catch (error: any) {
