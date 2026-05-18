@@ -9,15 +9,19 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Sales User');
   const [error, setError] = useState('');
-  const { login } = useAuthStore();
+  
   const navigate = useNavigate();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/auth/register', { name, email, password, role });
-      await login(email, password);
-      navigate('/');
+      const response = await api.post('/auth/register', { name, email, password, role });
+      if (response.data.success) {
+        const { token, ...user } = response.data.data;
+        setAuth(user, token);
+        navigate('/');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to register');
     }

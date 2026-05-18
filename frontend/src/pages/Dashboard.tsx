@@ -37,7 +37,6 @@ export default function Dashboard() {
   const debouncedSearch = useDebounce(search, 500);
   const [status, setStatus] = useState('');
   const [source, setSource] = useState('');
-  const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -45,7 +44,7 @@ export default function Dashboard() {
   const fetchLeads = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({ page: page.toString(), sort });
+      const params = new URLSearchParams({ page: page.toString(), sort: 'latest' });
       if (debouncedSearch) params.append('search', debouncedSearch);
       if (status) params.append('status', status);
       if (source) params.append('source', source);
@@ -63,8 +62,8 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => { fetchLeads(); }, [page, debouncedSearch, status, source, sort]);
-  useEffect(() => { setPage(1); }, [debouncedSearch, status, source, sort]);
+  useEffect(() => { fetchLeads(); }, [page, debouncedSearch, status, source]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, status, source]);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this lead?')) return;
